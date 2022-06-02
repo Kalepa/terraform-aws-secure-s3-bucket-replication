@@ -1,6 +1,6 @@
 resource "aws_s3_bucket_replication_configuration" "a_to_b" {
   count    = var.replicate_a_to_b ? 1 : 0
-  provider = aws.bucket_a
+  provider = aws.a
   depends_on = [
     module.assert_same_account,
     aws_iam_role_policy.a_outbound,
@@ -10,12 +10,12 @@ resource "aws_s3_bucket_replication_configuration" "a_to_b" {
   bucket = var.bucket_a_module.bucket.id
 
   dynamic "rule" {
-    for_each = var.a_to_b_rules
+    for_each = local.a_to_b_rules
     content {
       id = rule.value.id
       // Rules are listed by descending priority, so the first rule should have the highest
       // priority number.
-      priority = length(var.a_to_b_rules) - tonumber(rule.key)
+      priority = length(local.a_to_b_rules) - tonumber(rule.key)
 
       // If you don't want it to be enabled, don't include it in the list of rules
       status = "Enabled"
@@ -40,8 +40,11 @@ resource "aws_s3_bucket_replication_configuration" "a_to_b" {
               status = "Enabled"
             }
           }
-          sse_kms_encrypted_objects {
-            status = var.bucket_b_module.kms_key_arn != null ? "Enabled" : "Disabled"
+          dynamic "sse_kms_encrypted_objects" {
+            for_each = var.bucket_b_module.kms_key_arn != null ? [1] : []
+            content {
+              status = "Enabled"
+            }
           }
         }
       }
@@ -101,7 +104,7 @@ resource "aws_s3_bucket_replication_configuration" "a_to_b" {
 
 resource "aws_s3_bucket_replication_configuration" "b_to_a" {
   count    = var.replicate_b_to_a ? 1 : 0
-  provider = aws.bucket_b
+  provider = aws.b
   depends_on = [
     module.assert_same_account,
     aws_iam_role_policy.b_outbound,
@@ -111,12 +114,12 @@ resource "aws_s3_bucket_replication_configuration" "b_to_a" {
   bucket = var.bucket_b_module.bucket.id
 
   dynamic "rule" {
-    for_each = var.b_to_a_rules
+    for_each = local.b_to_a_rules
     content {
       id = rule.value.id
       // Rules are listed by descending priority, so the first rule should have the highest
       // priority number.
-      priority = length(var.b_to_a_rules) - tonumber(rule.key)
+      priority = length(local.b_to_a_rules) - tonumber(rule.key)
 
       // If you don't want it to be enabled, don't include it in the list of rules
       status = "Enabled"
@@ -141,8 +144,11 @@ resource "aws_s3_bucket_replication_configuration" "b_to_a" {
               status = "Enabled"
             }
           }
-          sse_kms_encrypted_objects {
-            status = var.bucket_a_module.kms_key_arn != null ? "Enabled" : "Disabled"
+          dynamic "sse_kms_encrypted_objects" {
+            for_each = var.bucket_b_module.kms_key_arn != null ? [1] : []
+            content {
+              status = "Enabled"
+            }
           }
         }
       }

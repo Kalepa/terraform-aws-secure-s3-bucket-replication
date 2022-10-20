@@ -1,5 +1,5 @@
 variable "bucket_a_module" {
-  description = "The Invicton-Labs/secure-s3-bucket/aws module that was used to create bucket A."
+  description = "The Kalepa/secure-s3-bucket/aws module that was used to create bucket A."
   type = object({
     name       = string
     region     = string
@@ -20,7 +20,7 @@ variable "bucket_a_module" {
 }
 
 variable "bucket_b_module" {
-  description = "The Invicton-Labs/secure-s3-bucket/aws module that was used to create bucket B."
+  description = "The Kalepa/secure-s3-bucket/aws module that was used to create bucket B."
   type = object({
     name       = string
     region     = string
